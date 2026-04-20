@@ -1,38 +1,49 @@
-# Smart Vocab
+# Smart Vocab 🧠📚
 
-TOEIC 단어를 매일 조금씩 보고, 틀린 단어를 다시 끌어올려 복습하는 Flutter 기반 단어 학습 앱입니다. 단어장을 넘기는 데서 끝내지 않고, 오늘의 학습량과 오답 흐름을 같이 관리하는 데 초점을 맞췄습니다.
+TOEIC 단어를 "매일 조금씩" 학습하고, 틀린 단어를 우선적으로 복습하는 Flutter 기반 단어 학습 앱입니다.
+단순 단어장 넘기기를 넘어서 오늘의 학습량과 오답 흐름을 함께 관리하는 데 초점을 맞췄습니다.
 
-## 만든 이유
+---
 
-TOEIC 단어는 한 번에 많이 보는 것보다 매일 정해진 양을 보고, 헷갈린 단어를 바로 다시 만나는 방식이 오래 갑니다. 기존 단어장 앱은 목록, 퀴즈, 즐겨찾기 중심인 경우가 많아서 “오늘 내가 틀린 단어가 다음 문제 흐름에 어떻게 반영되는지”가 약했습니다. 그래서 일일 목표, Day 단위 분산, 오답 우선 복습을 한 화면에서 이어지게 만들었습니다.
+## 🎯 만든 이유
 
-## 차별점
+매번 많은 단어를 몰아서 보기보다, 매일 정해진 양을 꾸준히 보고 헷갈리는 단어를 바로 복습하는 방식이 장기 유지에 효과적입니다. 기존 앱들이 문제 흐름과 오답 반영을 분리해둔 것과 달리, 본 앱은 **오답 흐름을 자연스럽게 다음 학습에 연결**하도록 설계했습니다.
 
-- 약점 집중 퀴즈: 사용자가 틀린 횟수와 정답 횟수를 바탕으로 아직 안정되지 않은 단어를 먼저 냅니다.
-- 일일 목표 관리: 하루 단어 수와 Day 그룹 목표를 분리해서, 한 주제만 몰아서 보는 문제를 줄입니다.
-- 오답 흐름 유지: 목표를 채운 뒤에도 남은 오답이 있으면 복습 모드로 이어집니다.
-- 선택형 튜터 설명: AI 토큰이 있으면 오답 설명과 예문을 받고, 없으면 기본 오프라인 안내로 앱 흐름을 유지합니다.
-- 개인 배포 친화 구조: API 키, JWT secret, DB 파일, 로컬 터널 주소는 코드에 넣지 않고 환경변수와 예시 파일로 분리했습니다.
+---
 
-## 주요 기능
+## ✨ 핵심 차별점
 
-- 회원가입/로그인
-- TOEIC 단어 Day/주제별 목록
-- 뜻 맞히기/단어 맞히기 랜덤 퀴즈
-- 오늘 학습량, 정답률, Day 진행률 확인
-- 틀린 단어 목록과 검색
-- 약점 집중 퀴즈
-- 단어 발음 TTS
-- 선택형 AI 튜터 채팅 및 오답 설명
+- 🔁 약점 집중 퀴즈: 틀린 횟수 기반으로 불안정 단어 우선 출제
+- 📅 일일 목표 분리: 하루 목표 vs Day 그룹 목표 분리로 과도한 편중 학습 방지
+- 🔄 오답 흐름 유지: 목표 달성 후에도 남은 오답은 자동 복습으로 전환
+- 🤖 선택형 AI 튜터: 토큰이 있을 경우 AI 설명·예문 제공, 없으면 오프라인 가이드 유지
+- 🔐 배포 친화 구조: 민감 정보는 `.env` 및 예시 파일로 분리
+
+---
+
+## 🔧 주요 기능
+
+- 회원가입 / 로그인
+- Day / 주제별 단어 목록
+- 뜻 맞히기 / 단어 맞히기 랜덤 퀴즈
+- 오늘 학습량, 정답률, Day 진행률 대시보드
+- 틀린 단어 목록 검색 및 복습
+- 약점 집중 모드
+- 단어 발음(TTS)
+- 선택형 AI 튜터 채팅 (옵션)
 - Android APK 빌드 스크립트
 
-## 기술 스택
+---
+
+## 🛠 기술 스택
 
 - App: Flutter, Dart, Dio, shared_preferences, flutter_tts
-- Server: Node.js, Fastify, SQLite, better-sqlite3, JWT
+- Server: Node.js, Fastify, SQLite (better-sqlite3), JWT
 - Data: TOEIC vocabulary JSON seed
 
-## Tree
+---
+
+## 📁 프로젝트 구조 (요약)
 
 ```text
 .
@@ -40,51 +51,17 @@ TOEIC 단어는 한 번에 많이 보는 것보다 매일 정해진 양을 보�
 ├── build_release.ps1
 ├── start_server.ps1
 ├── 토익.json
-├── mobile
-│   ├── lib
-│   │   ├── main.dart
-│   │   ├── screens
-│   │   │   ├── ai_chat_screen.dart
-│   │   │   ├── dashboard_screen.dart
-│   │   │   ├── login_screen.dart
-│   │   │   ├── quiz_screen.dart
-│   │   │   ├── review_screen.dart
-│   │   │   ├── settings_screen.dart
-│   │   │   ├── signup_screen.dart
-│   │   │   └── word_list_screen.dart
-│   │   └── services
-│   │       ├── ai_service.dart
-│   │       ├── api_service.dart
-│   │       ├── lang_service.dart
-│   │       ├── tts_service.dart
-│   │       └── update_service.dart
-│   ├── android
-│   ├── ios
-│   ├── web
-│   ├── windows
-│   └── pubspec.yaml
-└── server
-    ├── .env.example
-    ├── package.json
-    └── src
-        ├── config.js
-        ├── index.js
-        ├── db
-        │   ├── seed.js
-        │   ├── seed_jp.js
-        │   └── seed_topik_jp.js
-        └── routes
-            ├── ai.js
-            ├── admin.js
-            ├── auth.js
-            ├── progress.js
-            ├── update.js
-            └── vocab.js
+├── mobile/
+└── server/
 ```
 
-## 실행 방법
+더 상세한 트리는 원본 파일을 참고하세요.
 
-### Server
+---
+
+## 🚀 빠른 실행 가이드
+
+### 서버
 
 ```powershell
 cd server
@@ -94,7 +71,7 @@ npm run seed
 npm start
 ```
 
-### Flutter App
+### Flutter 앱
 
 ```powershell
 cd mobile
@@ -102,4 +79,26 @@ flutter pub get
 flutter run --dart-define=API_BASE_URL=http://localhost:3000
 ```
 
-Android 에뮬레이터에서 로컬 PC 서버에 붙을 때는 `API_BASE_URL`을 환경에 맞게 바꿔 주세요.
+> 에뮬레이터에서 로컬 서버 사용 시 `API_BASE_URL`을 환경에 맞게 조정하세요.
+
+---
+
+## 💡 사용자 관점의 설계 포인트
+
+- 텍스트와 컨트롤은 충분히 큰 크기(가독성 우선)
+- 단계적 안내(한 번에 한 작업)로 학습 흐름 단순화
+- 아이콘 + 텍스트 조합으로 의미를 빠르게 전달
+- 오류 메시지는 해결 방법을 함께 제시
+
+이러한 설계는 특히 바쁜 실무자와 장년층 사용자의 진입 장벽을 낮추는 데 목적이 있습니다.
+
+---
+
+## 기여 / 라이선스
+
+PR·이슈 환영합니다. 개인/학습용으로 활용하기 좋게 구성했으니 개선 아이디어 있으시면 자유롭게 제안해주세요. 👍
+
+---
+
+문의: 필요하시면 이 README로 PR 생성(또는 제가 바로 브랜치에 푸시해 PR 생성)해 드립니다.
+
