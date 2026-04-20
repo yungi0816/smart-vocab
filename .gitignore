@@ -1,0 +1,56 @@
+# Dependencies
+server/node_modules/
+mobile/.dart_tool/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+
+# Build outputs
+mobile/build/
+mobile/android/.gradle/
+mobile/android/.kotlin/
+mobile/ios/Flutter/ephemeral/
+mobile/windows/flutter/ephemeral/
+releases/
+*.apk
+*.aab
+*.ipa
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+server/.env
+server/.env.*
+!server/.env.example
+server/data/
+*.db
+*.sqlite
+*.sqlite3
+*.log
+mobile/android/local.properties
+mobile/ios/Flutter/flutter_export_environment.sh
+
+# IDE and generated metadata
+.idea/
+.vscode/
+*.iml
+.egovServers/
+
+# Private notes and raw working files
+task.md
+temp_words.txt
+remove_bg.py
+legacy_spring_backup/
+.github/java-upgrade/
+server/src/routes/create_admin.js
+
+# Pet feature is not included in the public version
+포메/
+mobile/assets/pets/
+mobile/lib/models/pet.dart
+mobile/lib/services/pet_service.dart
+mobile/lib/screens/pet_selection_screen.dart
+mobile/lib/widgets/animated_pet_widget.dart
+mobile/lib/widgets/painted_pet_widget.dart
+mobile/lib/widgets/pet_avatar.dart
+mobile/lib/widgets/farm_background.dart

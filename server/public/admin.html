@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Vocab 관리자</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0F172A;
+      --surface: #1E293B;
+      --surface2: #334155;
+      --border: #475569;
+      --text: #F1F5F9;
+      --text2: #94A3B8;
+      --accent: #38BDF8;
+      --green: #10B981;
+      --red: #EF4444;
+      --yellow: #FBBF24;
+      --purple: #A78BFA;
+      --radius: 12px;
+    }
+
+    body {
+      font-family: 'Segoe UI', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ===== Login ===== */
+    #login-overlay {
+      position: fixed; inset: 0;
+      background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1000;
+    }
+    .login-box {
+      background: var(--surface);
+      padding: 48px 40px;
+      border-radius: 20px;
+      text-align: center;
+      width: 380px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.5);
+    }
+    .login-box h1 { font-size: 24px; margin-bottom: 8px; }
+    .login-box p { color: var(--text2); margin-bottom: 28px; font-size: 14px; }
+    .login-box input {
+      width: 100%; padding: 14px 18px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--radius); color: var(--text);
+      font-size: 15px; margin-bottom: 16px; outline: none;
+    }
+    .login-box input:focus { border-color: var(--accent); }
+    .login-box button {
+      width: 100%; padding: 14px;
+      background: var(--accent); color: #fff;
+      border: none; border-radius: var(--radius);
+      font-size: 15px; font-weight: 600; cursor: pointer;
+      transition: opacity .15s;
+    }
+    .login-box button:hover { opacity: .85; }
+    .login-error { color: var(--red); font-size: 13px; margin-bottom: 12px; display: none; }
+
+    /* ===== Layout ===== */
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 32px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .topbar h1 { font-size: 20px; display: flex; align-items: center; gap: 10px; }
+    .topbar .actions { display: flex; gap: 12px; align-items: center; }
+    .topbar .actions button {
+      padding: 8px 16px; border: 1px solid var(--border);
+      background: transparent; color: var(--text2);
+      border-radius: 8px; cursor: pointer; font-size: 13px;
+    }
+    .topbar .actions button:hover { border-color: var(--accent); color: var(--accent); }
+
+    .container { max-width: 1400px; margin: 0 auto; padding: 28px 32px; }
+
+    /* ===== Tabs ===== */
+    .tabs { display: flex; gap: 4px; margin-bottom: 28px; }
+    .tab {
+      padding: 10px 22px; border-radius: 8px;
+      background: transparent; border: none;
+      color: var(--text2); font-size: 14px; font-weight: 500;
+      cursor: pointer; transition: all .15s;
+    }
+    .tab:hover { background: var(--surface); color: var(--text); }
+    .tab.active { background: var(--accent); color: #fff; }
+
+    /* ===== Cards ===== */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px; margin-bottom: 32px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 22px 24px;
+      border: 1px solid transparent;
+      transition: border-color .15s;
+    }
+    .stat-card:hover { border-color: var(--border); }
+    .stat-card .label { font-size: 13px; color: var(--text2); margin-bottom: 8px; }
+    .stat-card .value { font-size: 32px; font-weight: 700; }
+    .stat-card .sub { font-size: 12px; color: var(--text2); margin-top: 4px; }
+    .stat-card.accent .value { color: var(--accent); }
+    .stat-card.green .value { color: var(--green); }
+    .stat-card.yellow .value { color: var(--yellow); }
+    .stat-card.purple .value { color: var(--purple); }
+
+    /* ===== Table ===== */
+    .panel {
+      background: var(--surface);
+      border-radius: var(--radius);
+      overflow: hidden; margin-bottom: 24px;
+    }
+    .panel-header {
+      padding: 18px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--surface2);
+    }
+    .panel-header h2 { font-size: 16px; }
+    .search-input {
+      padding: 8px 14px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text); font-size: 13px;
+      outline: none; width: 240px;
+    }
+    .search-input:focus { border-color: var(--accent); }
+
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px 24px; text-align: left; font-size: 14px; }
+    th { color: var(--text2); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid var(--surface2); }
+    tr:not(:last-child) td { border-bottom: 1px solid rgba(51,65,85,.4); }
+    tr:hover td { background: rgba(56,189,248,.04); }
+
+    .badge {
+      display: inline-block; padding: 3px 10px;
+      border-radius: 20px; font-size: 11px; font-weight: 600;
+    }
+    .badge-green { background: rgba(16,185,129,.15); color: var(--green); }
+    .badge-yellow { background: rgba(251,191,36,.15); color: var(--yellow); }
+    .badge-red { background: rgba(239,68,68,.15); color: var(--red); }
+    .badge-gray { background: rgba(148,163,184,.15); color: var(--text2); }
+
+    .btn {
+      padding: 6px 14px; border: none; border-radius: 6px;
+      font-size: 12px; font-weight: 500; cursor: pointer;
+      transition: opacity .15s;
+    }
+    .btn:hover { opacity: .8; }
+    .btn-danger { background: var(--red); color: #fff; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text2); }
+
+    /* ===== Chart ===== */
+    .chart-container {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 24px; margin-bottom: 24px;
+    }
+    .chart-container h3 { font-size: 15px; margin-bottom: 16px; }
+    .bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 160px; }
+    .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .bar {
+      width: 100%; border-radius: 4px 4px 0 0;
+      background: var(--accent); opacity: .8;
+      transition: opacity .15s; min-height: 2px;
+    }
+    .bar:hover { opacity: 1; }
+    .bar-label { font-size: 10px; color: var(--text2); }
+    .bar-value { font-size: 11px; color: var(--text); font-weight: 600; }
+
+    /* ===== Word Stats ===== */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+
+    /* ===== Modal ===== */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.6);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 500; display: none;
+    }
+    .modal-overlay.visible { display: flex; }
+    .modal {
+      background: var(--surface);
+      border-radius: 16px; padding: 32px;
+      width: 480px; max-height: 80vh; overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,.5);
+    }
+    .modal h2 { margin-bottom: 20px; }
+    .modal .field { margin-bottom: 16px; }
+    .modal .field label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 4px; }
+    .modal .field .val { font-size: 16px; font-weight: 500; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 24px; justify-content: flex-end; }
+
+    .hidden { display: none !important; }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 768px) {
+      .container { padding: 16px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      th, td { padding: 10px 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== Login Overlay ===== -->
+  <div id="login-overlay">
+    <div class="login-box">
+      <h1>🔐 관리자 로그인</h1>
+      <p>Smart Vocab 대시보드에 접속합니다</p>
+      <div class="login-error" id="login-error">비밀번호가 틀렸습니다.</div>
+      <input type="password" id="admin-pw" placeholder="관리자 비밀번호" autofocus>
+      <button onclick="doLogin()">로그인</button>
+    </div>
+  </div>
+
+  <!-- ===== Topbar ===== -->
+  <div class="topbar">
+    <h1>📊 Smart Vocab Admin</h1>
+    <div class="actions">
+      <span id="server-status" style="font-size:13px;color:var(--text2)"></span>
+      <button onclick="loadCurrentTab()">🔄 새로고침</button>
+      <button onclick="doLogout()">🚪 로그아웃</button>
+    </div>
+  </div>
+
+  <!-- ===== Main ===== -->
+  <div class="container">
+    <div class="tabs">
+      <button class="tab active" data-tab="dashboard" onclick="switchTab('dashboard')">📈 대시보드</button>
+      <button class="tab" data-tab="users" onclick="switchTab('users')">👤 사용자 관리</button>
+      <button class="tab" data-tab="words" onclick="switchTab('words')">📚 단어 통계</button>
+      <button class="tab" data-tab="ai" onclick="switchTab('ai')">🤖 AI 인증</button>
+    </div>
+
+    <!-- Dashboard Tab -->
+    <div id="tab-dashboard">
+      <div class="stats-grid" id="stats-cards"></div>
+      <div class="chart-container">
+        <h3>📊 최근 7일 학습 추이</h3>
+        <div class="bar-chart" id="weekly-chart"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><h2>🆕 최근 가입 사용자</h2></div>
+        <table>
+          <thead><tr><th>아이디</th><th>이름</th><th>가입일</th></tr></thead>
+          <tbody id="recent-signups"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Users Tab -->
+    <div id="tab-users" class="hidden">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>👤 사용자 목록</h2>
+          <input class="search-input" id="user-search" placeholder="아이디 또는 이름 검색..." oninput="debounceSearch()">
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>아이디</th><th>이름</th><th>가입일</th>
+              <th>총 문제</th><th>정답률</th><th>마지막 학습</th><th>관리</th>
+            </tr>
+          </thead>
+          <tbody id="user-list"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- AI Auth Tab -->
+    <div id="tab-ai" class="hidden">
+      <div class="panel">
+        <div class="panel-header"><h2>🤖 AI 인증 관리</h2></div>
+        <div style="padding:20px">
+          <p style="color:var(--text2);margin-bottom:20px;line-height:1.6">
+            AI 토큰으로 선택형 튜터 기능을 활성화합니다.<br>
+            서버에서 한 번 인증하면 모든 앱 사용자가 AI 튜터를 사용할 수 있습니다.
+          </p>
+          <div id="ai-status-box" style="background:var(--bg);padding:20px;border-radius:var(--radius);margin-bottom:24px">
+            <div style="display:flex;align-items:center;gap:12px">
+              <span id="ai-status-dot" style="width:14px;height:14px;border-radius:50%;display:inline-block"></span>
+              <div>
+                <div id="ai-status-text" style="font-weight:600;font-size:16px"></div>
+                <div id="ai-model-text" style="color:var(--text2);font-size:13px;margin-top:2px"></div>
+              </div>
+            </div>
+          </div>
+          <div id="ai-auth-actions"></div>
+          <div id="ai-device-flow" class="hidden" style="background:var(--bg);padding:24px;border-radius:var(--radius);margin-top:20px;text-align:center">
+            <p style="color:var(--text2);margin-bottom:16px">아래 코드를 GitHub에 입력하세요:</p>
+            <div id="ai-user-code" style="font-size:36px;font-weight:bold;letter-spacing:8px;color:var(--accent);font-family:monospace;margin-bottom:16px"></div>
+            <a id="ai-verify-link" href="#" target="_blank" rel="noopener" style="display:inline-block;padding:12px 24px;background:var(--accent);color:#fff;border-radius:8px;text-decoration:none;font-weight:600;margin-bottom:16px">GitHub에서 인증하기 →</a>
+            <div id="ai-poll-status" style="color:var(--text2);font-size:13px;margin-top:12px">⏳ 인증 대기 중...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Words Tab -->
+    <div id="tab-words" class="hidden">
+      <div class="two-col">
+        <div class="panel">
+          <div class="panel-header"><h2>📖 DAY별 단어 현황</h2></div>
+          <table>
+            <thead><tr><th>DAY</th><th>테마</th><th>언어</th><th>단어 수</th></tr></thead>
+            <tbody id="word-days"></tbody>
+          </table>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><h2>💀 가장 어려운 단어 TOP 20</h2></div>
+          <table>
+            <thead><tr><th>단어</th><th>뜻</th><th>시도</th><th>정답률</th></tr></thead>
+            <tbody id="hardest-words"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== User Detail Modal ===== -->
+  <div class="modal-overlay" id="user-modal">
+    <div class="modal">
+      <h2>👤 사용자 상세</h2>
+      <div id="user-detail-body"></div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal()">닫기</button>
+        <button class="btn btn-danger" id="delete-user-btn">탈퇴 처리</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+// ===== Config =====
+const API_BASE = location.origin;
+let adminKey = '';
+let currentTab = 'dashboard';
+let searchTimer = null;
+
+// ===== Auth =====
+function doLogin() {
+  const pw = document.getElementById('admin-pw').value;
+  fetch(`${API_BASE}/api/admin/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: pw }),
+  })
+    .then(r => {
+      if (!r.ok) throw new Error();
+      adminKey = pw;
+      sessionStorage.setItem('ak', pw);
+      document.getElementById('login-overlay').classList.add('hidden');
+      loadCurrentTab();
+    })
+    .catch(() => {
+      const el = document.getElementById('login-error');
+      el.style.display = 'block';
+    });
+}
+document.getElementById('admin-pw').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+function doLogout() {
+  sessionStorage.removeItem('ak');
+  adminKey = '';
+  location.reload();
+}
+
+// ===== Auto-login =====
+(function init() {
+  const saved = sessionStorage.getItem('ak');
+  if (saved) {
+    adminKey = saved;
+    document.getElementById('login-overlay').classList.add('hidden');
+    loadCurrentTab();
+  }
+})();
+
+// ===== Fetch Helper =====
+async function api(path) {
+  const res = await fetch(`${API_BASE}${path}`, {
+    headers: { 'x-admin-key': adminKey },
+  });
+  if (res.status === 403) { doLogout(); throw new Error('auth'); }
+  return res.json();
+}
+async function apiMut(path, method, body) {
+  const headers = { 'x-admin-key': adminKey };
+  if (body) headers['Content-Type'] = 'application/json';
+  const res = await fetch(`${API_BASE}${path}`, {
+    method,
+    headers,
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  return res.json();
+}
+
+// ===== Tabs =====
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  ['dashboard', 'users', 'words', 'ai'].forEach(t => {
+    document.getElementById('tab-' + t).classList.toggle('hidden', t !== tab);
+  });
+  currentTab = tab;
+  loadCurrentTab();
+}
+
+function loadCurrentTab() {
+  if (currentTab === 'dashboard') loadDashboard();
+  else if (currentTab === 'users') loadUsers();
+  else if (currentTab === 'words') loadWords();
+  else if (currentTab === 'ai') loadAiStatus();
+}
+
+// ===== Dashboard =====
+async function loadDashboard() {
+  try {
+    const d = await api('/api/admin/dashboard');
+    document.getElementById('server-status').textContent = '🟢 서버 정상';
+
+    document.getElementById('stats-cards').innerHTML = `
+      <div class="stat-card accent"><div class="label">전체 사용자</div><div class="value">${d.totalUsers}</div></div>
+      <div class="stat-card green"><div class="label">오늘 활동 사용자</div><div class="value">${d.todayActiveUsers}</div></div>
+      <div class="stat-card yellow"><div class="label">전체 문제 풀이</div><div class="value">${d.totalAttempts.toLocaleString()}</div><div class="sub">오늘 ${d.todayAttempts.toLocaleString()}</div></div>
+      <div class="stat-card purple"><div class="label">전체 정답률</div><div class="value">${d.overallAccuracy}%</div></div>
+      <div class="stat-card"><div class="label">등록 단어 수</div><div class="value">${d.totalWords.toLocaleString()}</div></div>
+    `;
+
+    // Weekly chart
+    const chart = document.getElementById('weekly-chart');
+    const maxAttempts = Math.max(...d.weeklyTrend.map(r => r.attempts), 1);
+    chart.innerHTML = d.weeklyTrend.map(r => {
+      const h = Math.round((r.attempts / maxAttempts) * 140);
+      const acc = r.attempts > 0 ? Math.round((r.correct / r.attempts) * 100) : 0;
+      return `<div class="bar-col">
+        <div class="bar-value">${r.attempts}</div>
+        <div class="bar" style="height:${h}px" title="${r.date}: ${r.attempts}문제, ${acc}% 정답"></div>
+        <div class="bar-label">${r.date.slice(5)}</div>
+      </div>`;
+    }).join('');
+
+    // Recent signups
+    document.getElementById('recent-signups').innerHTML = d.recentSignups.map(u =>
+      `<tr><td>${esc(u.user_id)}</td><td>${esc(u.user_name)}</td><td>${u.created_at || '-'}</td></tr>`
+    ).join('');
+  } catch (e) {
+    if (e.message !== 'auth') document.getElementById('server-status').textContent = '🔴 서버 연결 실패';
+  }
+}
+
+// ===== Users =====
+async function loadUsers(search) {
+  const q = search || document.getElementById('user-search')?.value || '';
+  const users = await api('/api/admin/users' + (q ? `?search=${encodeURIComponent(q)}` : ''));
+
+  document.getElementById('user-list').innerHTML = users.map(u => {
+    const acc = u.total_attempts > 0 ? Math.round((u.correct_count / u.total_attempts) * 100) : 0;
+    let badge = 'badge-gray';
+    if (acc >= 80) badge = 'badge-green';
+    else if (acc >= 50) badge = 'badge-yellow';
+    else if (u.total_attempts > 0) badge = 'badge-red';
+
+    return `<tr>
+      <td><a href="#" onclick="showUser('${esc(u.user_id)}');return false" style="color:var(--accent)">${esc(u.user_id)}</a></td>
+      <td>${esc(u.user_name)}</td>
+      <td style="color:var(--text2);font-size:13px">${u.created_at || '-'}</td>
+      <td>${u.total_attempts.toLocaleString()}</td>
+      <td><span class="badge ${badge}">${acc}%</span></td>
+      <td style="color:var(--text2);font-size:13px">${u.last_studied ? u.last_studied.slice(0, 10) : '없음'}</td>
+      <td>
+        <button class="btn btn-danger" onclick="confirmDelete('${esc(u.user_id)}')">삭제</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function debounceSearch() {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => loadUsers(), 300);
+}
+
+// ===== User Detail Modal =====
+async function showUser(id) {
+  const u = await api(`/api/admin/users/${encodeURIComponent(id)}`);
+  const acc = u.total > 0 ? Math.round((u.correct / u.total) * 100) : 0;
+
+  document.getElementById('user-detail-body').innerHTML = `
+    <div class="field"><label>아이디</label><div class="val">${esc(u.user_id)}</div></div>
+    <div class="field"><label>이름</label><div class="val">${esc(u.user_name)}</div></div>
+    <div class="field"><label>가입일</label><div class="val">${u.created_at || '-'}</div></div>
+    <div class="field"><label>일일 할당량</label>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="number" id="quota-input" value="${u.daily_quota}" min="1" max="200"
+          style="width:80px;padding:6px 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px">
+        <button class="btn btn-primary" onclick="updateQuota('${esc(u.user_id)}')">변경</button>
+      </div>
+    </div>
+    <div class="field"><label>총 문제 / 정답 / 정답률</label><div class="val">${u.total} / ${u.correct} / ${acc}%</div></div>
+    ${u.dailyHistory.length > 0 ? `
+      <div class="field"><label>최근 학습 기록 (30일)</label>
+        <table style="margin-top:8px">
+          <thead><tr><th>날짜</th><th>풀이</th><th>정답</th><th>정답률</th></tr></thead>
+          <tbody>${u.dailyHistory.map(h => {
+            const a = h.attempts > 0 ? Math.round((h.correct / h.attempts) * 100) : 0;
+            return `<tr><td>${h.date}</td><td>${h.attempts}</td><td>${h.correct}</td><td>${a}%</td></tr>`;
+          }).join('')}</tbody>
+        </table>
+      </div>
+    ` : ''}
+  `;
+
+  document.getElementById('delete-user-btn').onclick = () => confirmDelete(u.user_id);
+  document.getElementById('user-modal').classList.add('visible');
+}
+
+function closeModal() { document.getElementById('user-modal').classList.remove('visible'); }
+
+async function updateQuota(userId) {
+  const quota = parseInt(document.getElementById('quota-input').value);
+  if (!quota || quota < 1 || quota > 200) return alert('1~200 사이 값을 입력해주세요');
+  const r = await apiMut(`/api/admin/users/${encodeURIComponent(userId)}/quota`, 'PUT', { quota });
+  if (r.success) { alert('할당량이 변경되었습니다.'); loadUsers(); }
+}
+
+async function confirmDelete(userId) {
+  if (!confirm(`정말로 "${userId}" 사용자를 탈퇴 처리하시겠습니까?\n\n⚠️ 모든 학습 기록이 삭제됩니다.`)) return;
+  const r = await apiMut(`/api/admin/users/${encodeURIComponent(userId)}`, 'DELETE');
+  if (r.success) {
+    alert(r.message);
+    closeModal();
+    loadUsers();
+    if (currentTab === 'dashboard') loadDashboard();
+  }
+}
+
+// ===== Words =====
+async function loadWords() {
+  const d = await api('/api/admin/words/stats');
+
+  document.getElementById('word-days').innerHTML = d.byDay.map(w =>
+    `<tr><td>${esc(w.day_index)}</td><td>${esc(w.theme || '-')}</td><td>${w.language_type}</td><td>${w.word_count}</td></tr>`
+  ).join('');
+
+  document.getElementById('hardest-words').innerHTML = d.hardestWords.map(w => {
+    const badge = w.accuracy < 30 ? 'badge-red' : w.accuracy < 60 ? 'badge-yellow' : 'badge-green';
+    return `<tr><td style="font-weight:600">${esc(w.spell)}</td><td style="color:var(--text2)">${esc(w.meaning)}</td><td>${w.attempts}</td><td><span class="badge ${badge}">${w.accuracy}%</span></td></tr>`;
+  }).join('');
+}
+
+// ===== AI Auth =====
+let aiPollTimer = null;
+
+async function loadAiStatus() {
+  try {
+    const res = await fetch(`${API_BASE}/api/ai/auth/status`);
+    const d = await res.json();
+    const dot = document.getElementById('ai-status-dot');
+    const text = document.getElementById('ai-status-text');
+    const model = document.getElementById('ai-model-text');
+    const actions = document.getElementById('ai-auth-actions');
+
+    if (d.authenticated) {
+      dot.style.background = 'var(--green)';
+      text.textContent = '✅ AI 인증 완료 — 모든 사용자가 AI 기능을 사용할 수 있습니다';
+      model.textContent = `모델: ${d.model}`;
+      actions.innerHTML = '<button class="btn btn-ghost" onclick="startDeviceFlow()">🔄 토큰 재인증</button>';
+      document.getElementById('ai-device-flow').classList.add('hidden');
+    } else {
+      dot.style.background = 'var(--red)';
+      text.textContent = '❌ AI 미인증 — 인증이 필요합니다';
+      model.textContent = `모델: ${d.model} (인증 후 사용 가능)`;
+      actions.innerHTML = '<button class="btn btn-primary" onclick="startDeviceFlow()" style="padding:12px 32px;font-size:15px">🔑 GitHub 인증 시작</button>';
+    }
+  } catch {
+    document.getElementById('ai-status-dot').style.background = 'var(--red)';
+    document.getElementById('ai-status-text').textContent = '서버 연결 실패';
+  }
+}
+
+async function startDeviceFlow() {
+  clearInterval(aiPollTimer);
+  const flowEl = document.getElementById('ai-device-flow');
+  const pollStatus = document.getElementById('ai-poll-status');
+  flowEl.classList.remove('hidden');
+  pollStatus.textContent = '⏳ GitHub에 요청 중...';
+
+  try {
+    const res = await fetch(`${API_BASE}/api/ai/auth/start`, { method: 'POST' });
+    const data = await res.json();
+    if (!data.user_code) { pollStatus.textContent = '❌ 인증 시작 실패'; return; }
+
+    document.getElementById('ai-user-code').textContent = data.user_code;
+    const link = document.getElementById('ai-verify-link');
+    link.href = data.verification_uri || 'https://github.com/login/device';
+    pollStatus.textContent = '⏳ 브라우저에서 코드를 입력하고 인증해주세요...';
+
+    const deviceCode = data.device_code;
+    const interval = (data.interval || 5) * 1000;
+    let attempts = 0;
+    const maxAttempts = 60;
+
+    aiPollTimer = setInterval(async () => {
+      attempts++;
+      if (attempts > maxAttempts) {
+        clearInterval(aiPollTimer);
+        pollStatus.textContent = '⏰ 시간 초과 — 다시 시도해주세요';
+        return;
+      }
+      try {
+        const r = await fetch(`${API_BASE}/api/ai/auth/poll`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ device_code: deviceCode }),
+        });
+        const d = await r.json();
+        if (d.success) {
+          clearInterval(aiPollTimer);
+          pollStatus.innerHTML = '<span style="color:var(--green);font-size:16px">✅ 인증 성공!</span>';
+          setTimeout(() => loadAiStatus(), 1500);
+        } else if (d.error === 'expired_token') {
+          clearInterval(aiPollTimer);
+          pollStatus.textContent = '⏰ 코드가 만료되었습니다 — 다시 시도해주세요';
+        } else {
+          pollStatus.textContent = `⏳ 인증 대기 중... (${attempts}/${maxAttempts})`;
+        }
+      } catch { /* 계속 폴링 */ }
+    }, interval);
+  } catch {
+    pollStatus.textContent = '❌ 서버 연결 실패';
+  }
+}
+
+// ===== Helper =====
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+</script>
+</body>
+</html>

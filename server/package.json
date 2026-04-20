@@ -1,0 +1,21 @@
+{
+  "name": "smart-vocab-api",
+  "version": "1.0.0",
+  "description": "REST API server for TOEIC vocabulary study and focused review.",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "seed": "node src/db/seed.js",
+    "seed:topik": "node src/db/seed_topik_jp.js"
+  },
+  "dependencies": {
+    "@fastify/compress": "^8.3.1",
+    "@fastify/cors": "^11.0.0",
+    "@fastify/jwt": "^9.0.0",
+    "@fastify/static": "^9.1.0",
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^11.8.0",
+    "fastify": "^5.3.0"
+  }
+}
