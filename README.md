@@ -103,14 +103,3 @@ flutter run --dart-define=API_BASE_URL=http://localhost:3000
 ```
 
 Android 에뮬레이터에서 로컬 PC 서버에 붙을 때는 `API_BASE_URL`을 환경에 맞게 바꿔 주세요.
-
-## 공개 제외 항목
-
-아래 항목은 저장소에 올리지 않습니다.
-
-- API key, AI token, JWT secret, admin key
-- SQLite DB 파일과 로컬 데이터 디렉터리
-- ngrok 같은 개인 터널 주소
-- 빌드 산출물과 패키지 캐시
-- 내부 작업 메모
-- 펫 관련 에셋과 화면
