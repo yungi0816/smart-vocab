@@ -1,5 +1,11 @@
 # Smart Vocab 🧠📚
 
+[![Flutter](https://img.shields.io/badge/Flutter-02569B?style=flat-square&logo=flutter&logoColor=white)](https://flutter.dev/)
+[![Dart](https://img.shields.io/badge/Dart-0175C2?style=flat-square&logo=dart&logoColor=white)](https://dart.dev/)
+[![Node.js](https://img.shields.io/badge/Node.js-5FA04E?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Fastify](https://img.shields.io/badge/Fastify-000000?style=flat-square&logo=fastify&logoColor=white)](https://fastify.dev/)
+[![SQLite](https://img.shields.io/badge/SQLite-003B57?style=flat-square&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
+
 TOEIC 단어를 "매일 조금씩" 학습하고, 틀린 단어를 우선적으로 복습하는 Flutter 기반 단어 학습 앱입니다.
 단순 단어장 넘기기를 넘어서 오늘의 학습량과 오답 흐름을 함께 관리하는 데 초점을 맞췄습니다.
 
@@ -18,6 +24,12 @@ TOEIC 단어를 "매일 조금씩" 학습하고, 틀린 단어를 우선적으�
 - 🔄 오답 흐름 유지: 목표 달성 후에도 남은 오답은 자동 복습으로 전환
 - 🤖 선택형 AI 튜터: 토큰이 있을 경우 AI 설명·예문 제공, 없으면 오프라인 가이드 유지
 - 🔐 배포 친화 구조: 민감 정보는 `.env` 및 예시 파일로 분리
+
+## 이런 분에게 유용합니다
+
+- Flutter 앱과 Node.js API를 함께 구성하는 작은 풀스택 예제를 찾는 분
+- 학습 앱에서 오답, 일일 목표, 복습 흐름을 어떻게 연결할지 고민하는 분
+- SQLite seed 데이터, JWT 인증, 선택형 AI 기능을 한 저장소에서 보고 싶은 분
 
 ---
 
@@ -96,9 +108,13 @@ flutter run --dart-define=API_BASE_URL=http://localhost:3000
 
 ## 기여 / 라이선스
 
-PR·이슈 환영합니다. 개인/학습용으로 활용하기 좋게 구성했으니 개선 아이디어 있으시면 자유롭게 제안해주세요. 👍
+PR·이슈 환영합니다. 개인/학습용으로 활용하기 좋게 구성했으니 개선 아이디어 있으시면 자유롭게 제안해주세요.
 
----
+현재 명시 라이선스는 없습니다. 외부 재사용을 적극적으로 허용하려면 MIT 또는 Apache-2.0 같은 오픈소스 라이선스를 추가하는 것을 권장합니다.
 
-문의: 필요하시면 이 README로 PR 생성(또는 제가 바로 브랜치에 푸시해 PR 생성)해 드립니다.
+## 의견과 기여
+
+- 버그나 실행 문제는 [Issues](https://github.com/yungi0816/smart-vocab/issues)에 남겨주세요.
+- 기능 제안, 학습 UX, 데이터 구조 아이디어는 [Discussions](https://github.com/yungi0816/smart-vocab/discussions)에 남겨주세요.
+- 작은 문서 수정, 단어 데이터 개선, 테스트 보강 PR은 환영합니다.
 
